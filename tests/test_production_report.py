@@ -9,6 +9,7 @@ from production_report import assign_groups, summarize, render_html, configure_s
 
 
 EMPTY_RUNTIME = pd.DataFrame(columns=['day', 'line', 'hour_of_day', 'operating_minutes', 'invalid_rpm', 'downtime_minutes', 'minor_stop_minutes', 'samples'])
+EMPTY_HEADCOUNT = pd.DataFrame(columns=['p_date', 'fac_cd', 'juya', 'jo', 'tot_cnt', 'cur_cnt', 'abs_cnt'])
 
 
 class ReportingTests(unittest.TestCase):
@@ -172,14 +173,14 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(len(r), 5)
         self.assertEqual(r.run.nunique(), 3)
         e = pd.DataFrame(columns=['day', 'sensor_id', 'kwh'])
-        m, _, groups, _ = summarize(r, e, date(2026, 1, 1), ['01', '02'], runtime=EMPTY_RUNTIME)
+        m, _, groups, _ = summarize(r, e, date(2026, 1, 1), ['01', '02'], runtime=EMPTY_RUNTIME, headcount=EMPTY_HEADCOUNT)
         self.assertEqual(m['integrated_groups'], 1)
         self.assertEqual(m['standalone_lots'], 2)
         self.assertEqual(groups['생산량_kg'].sum(), 1050)
         self.assertEqual(m['integrated_lot'], 350)
         # A group remains one group even across different lines and recipe metadata.
         self.assertEqual(groups.loc[groups['묶음'] == '그룹:G1', '생산량_kg'].iloc[0], 350)
-        filtered, _, _, _ = summarize(r, e, date(2026, 1, 1), ['02'], runtime=EMPTY_RUNTIME)
+        filtered, _, _, _ = summarize(r, e, date(2026, 1, 1), ['02'], runtime=EMPTY_RUNTIME, headcount=EMPTY_HEADCOUNT)
         self.assertEqual(filtered['integrated_lot'], 200)
 
     def test_conflicting_group_mapping_rejected(self):
@@ -199,7 +200,7 @@ class ReportingTests(unittest.TestCase):
                                'hour_of_day': [f'{i:02d}' for i in range(12)],
                                'operating_minutes': [60] * 12, 'invalid_rpm': [0] * 12,
                                'downtime_minutes': [0] * 12, 'minor_stop_minutes': [0] * 12, 'samples': [60] * 12})
-        m, _, _, _ = summarize(r, e, date(2026, 1, 3), ['01'], people=2, runtime=hourly)
+        m, _, _, _ = summarize(r, e, date(2026, 1, 3), ['01'], people=2, runtime=hourly, headcount=EMPTY_HEADCOUNT)
         self.assertEqual(m['total'], m['a'] + m['b'])
         self.assertEqual(m['lots'], 1)
         self.assertEqual(m['average_lot'], 100)
@@ -209,7 +210,7 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(m['per_person'], 50)
         self.assertEqual(m['utilization'], 50)
         self.assertEqual(m['energy'], 25)
-        missing, lines, groups, _ = summarize(r, e, date(2026, 1, 2), ['01'], runtime=EMPTY_RUNTIME)
+        missing, lines, groups, _ = summarize(r, e, date(2026, 1, 2), ['01'], runtime=EMPTY_RUNTIME, headcount=EMPTY_HEADCOUNT)
         self.assertIsNone(missing['energy'])
         self.assertFalse(missing['source_present'])
         self.assertEqual(missing['utilization_status'], '기록 없음')

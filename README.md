@@ -27,7 +27,16 @@ streamlit run app.py
 - `01_분석용/EMS_전력계_15min집계.csv`
 - `01_분석용/전력요금_월별청구_2026.csv`
 
-현재 코드는 `.env`를 읽지 않으며 필수 비밀값도 없습니다. 입력 경로를 바꾸려면 `production_report.py`의 `DATA`를 변경해야 합니다. 정제 데이터로의 전환은 포함하지 않았습니다.
+환경변수 `SLP_DATA`로 CSV 폴더를 지정할 수 있습니다. 지정하지 않으면 기본 `v1/해커톤_업로드_2026`을 사용합니다. `.env`는 자동으로 읽지 않으며 필수 비밀값도 없습니다. 정제 데이터의 파일·필수 컬럼 호환성은 사용 환경에서 확인해야 합니다.
+
+팀 서버에서는 실행할 셸에서 다음과 같이 지정합니다.
+
+```bash
+export SLP_DATA='/data/hackathon/cleaned/해커톤_업로드_2026'
+streamlit run app.py
+```
+
+`.env.example`은 설정 이름을 보여주는 예시입니다. 파일을 복사하는 것만으로 환경변수가 적용되지는 않습니다.
 
 ## 계산 기준
 
@@ -54,6 +63,8 @@ streamlit run app.py
 웹 실행에는 `tests/`가 필요하지 않습니다. 테스트는 프로젝트 루트에서 아래 명령으로 실행합니다.
 
 ## 테스트
+
+가상 인원 fixture를 명시적으로 전달하므로 운영 CSV 없이 실행할 수 있습니다.
 
 ```bash
 python -m unittest discover -s tests -t . -p 'test_*.py'

@@ -18,7 +18,7 @@ from crew_schedule import build_crew_schedule, shift_labels
 from headcount_mapping import map_headcount_crews, mapping_records, applied_headcounts
 
 ROOT = Path(__file__).resolve().parent
-DATA = ROOT / 'v1' / '해커톤_업로드_2026'
+DATA = Path(os.environ.get('SLP_DATA') or ROOT / 'v1' / '해커톤_업로드_2026').expanduser()
 SETTINGS = ROOT / 'report_settings.json'
 KST = ZoneInfo('Asia/Seoul')
 CRON_MARKER = '# slp-production-daily-report'
