@@ -11,6 +11,7 @@ from production_report import (DATA, load_data, summarize, number, render_html, 
 st.set_page_config(page_title='결산 리포트 | SLP', page_icon='📊', layout='wide')
 st.markdown('''<style>
 .block-container{max-width:1680px;padding:1rem 2rem 1.5rem}
+.report-author{position:fixed;top:3.4rem;right:1.5rem;z-index:100;font-size:.75rem;color:#9caebf;pointer-events:none}
 h1{font-size:1.7rem!important;letter-spacing:-1px;padding:0 0 .35rem!important}
 h2,h3{font-size:1.05rem!important;padding:.3rem 0!important}
 [data-testid="stVerticalBlock"]{gap:.55rem}
@@ -25,7 +26,7 @@ h2,h3{font-size:1.05rem!important;padding:.3rem 0!important}
 [data-testid="stSidebar"] [data-baseweb="select"]>div{max-height:110px;overflow:auto}
 @media(max-width:700px){.block-container{padding:1rem}.st-key-metrics [data-testid="stMetricValue"]{font-size:1.1rem!important}}
 @media print{[data-testid="stSidebar"],button{display:none}}
-</style>''', unsafe_allow_html=True)
+</style><div class="report-author">작성자:김건태</div>''', unsafe_allow_html=True)
 st.title('결산 리포트')
 st.caption('날짜를 선택하면 생산 · LOT · 근무조 · 전력 지표와 리포트를 자동으로 작성합니다.')
 
