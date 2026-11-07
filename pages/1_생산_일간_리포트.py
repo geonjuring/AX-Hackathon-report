@@ -110,8 +110,8 @@ with st.expander('가동률에 포함된 가동 호기 목록'):
 
 for cells in [
     [((period_label + ' 생산량' if crew == '전체' else crew_view + ' ' + period_label + ' 생산량'), m['total'], ' kg'), ('A조 생산량 · ' + ((m['crew_shift_labels']['A'] + (' 근무' if m['crew_shift_labels']['A'] in ['주간','야간'] else '')) if period=='일간' else '기간 비교'), m['a'], ' kg'), ('B조 생산량 · ' + ((m['crew_shift_labels']['B'] + (' 근무' if m['crew_shift_labels']['B'] in ['주간','야간'] else '')) if period=='일간' else '기간 비교'), m['b'], ' kg'), (('전력량 · 한전 청구 기준' if billing_applied else '전력량 · DB 센서 기준'), m['energy'], ' kWh')],
-    [('평균 LOT SIZE', m['average_lot'], ' kg/LOT'), ('통합 LOT SIZE', m['integrated_lot'], ' kg/LOT'), (('가동률 · 가동 호기 기준' if period == '일간' else '가동률 · 가동 호기 합산') + (' · 잠정' if m['utilization_status'] == '잠정' else ''), m['utilization'], ' %'), ('압출기 전력량', m['extruder_energy'], ' kWh')],
-    [('금월 총생산량', m['month_total'], ' kg'), (('금월 가동일' if period == '일간' else '기간 가동일'), m['working_days'], ' 일'), (('금월 일평균' if period == '일간' else '기간 일평균'), m['daily_average'], ' kg/일'), ('인당 생산량 · 명·교대 기준', m['per_person'], ' kg/명·교대')],
+    [('평균 LOT SIZE', m['average_lot'], ' kg/LOT'), ('통합 LOT SIZE', m['integrated_lot'], ' kg/LOT'), ('가동률', m['utilization'], ' %'), ('압출기 전력량', m['extruder_energy'], ' kWh')],
+    [('금월 총생산량', m['month_total'], ' kg'), (('금월 가동일' if period == '일간' else '기간 가동일'), m['working_days'], ' 일'), (('금월 일평균' if period == '일간' else '기간 일평균'), m['daily_average'], ' kg/일'), ('인당 생산량', m['per_person'], ' kg/명·교대')],
 ]:
     for col, (label, value, unit) in zip(st.columns(4), cells):
         col.metric(label, '휴무 · 산정 제외' if label.startswith('가동률') and m['runtime_holiday'] else m['utilization_status'] if label.startswith('가동률') and m['utilization_status'] in ['가동 이력 없음','기록 없음'] else utilization_number(value) if label.startswith('가동률') else number(value, unit))
@@ -321,7 +321,6 @@ with st.expander('날짜별 A/B조 주야 근무 확인'):
     st.download_button('날짜별 근무조 주야간 CSV',shift_table.to_csv(index=False).encode('utf-8-sig'),f'crew_shifts_{m["range_start"]}_{m["range_end"]}.csv','text/csv')
     st.caption('생산실적 없음은 휴무·근무예정 여부를 확정하는 뜻이 아닙니다. 인원 계산에서는 원본을 보존하고 2공장 D→A·E→B 통일 후 같은 날짜·주야간 생산실적 기준으로 보정합니다.')
 
-st.caption('생산량·LOT·금월 지표는 선택 조 기준입니다. A/B조 비교 카드·압출기 전력량은 선택 라인의 조회 기간 전체 기준입니다. 가동률은 선택 라인 중 날짜별 가동 이력이 있는 호기만 포함합니다. 전체 사용 전력량은 공장 전체이며, 전력과 가동률을 조별로 배분하지 않습니다.')
 
 overview, details, lot_tab, basis = st.tabs(['생산 현황', '기간 리포트', '통합 LOT 검토', '계산 기준'])
 with overview:
