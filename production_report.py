@@ -393,7 +393,7 @@ def render_html(m, byline, groups):
     energy_note = (m.get('energy_basis_note', '') + (f" 월 청구량 {m['billing_month_usage']:,.1f} kWh · 보정계수 {m['billing_factor']:.6f}. 전력 집계 {m['energy_period_start']} ~ {m['energy_period_end']} KST." if billing else ' 센서 실측은 생산일 08:30부터 다음 날 08:30까지 합산하며 한전 청구량과 별도 기준입니다.'))
     crew_labels = m.get('crew_shift_labels',{})
     labels = [(m['crew_label'] + ' ' + kind_label + ' 생산량', 'total', ' kg'), ('A조 생산량 · ' + (crew_labels.get('A','주야 확인') if kind=='일간' else '기간 비교'), 'a', ' kg'), ('B조 생산량 · ' + (crew_labels.get('B','주야 확인') if kind=='일간' else '기간 비교'), 'b', ' kg'),
-              ('평균 LOT SIZE', 'average_lot', ' kg/LOT'), ('통합 LOT SIZE', 'integrated_lot', ' kg/묶음'),
+              ('평균 LOT SIZE', 'average_lot', ' kg/LOT'), ('통합 LOT SIZE', 'integrated_lot', ' kg/LOT'),
               (('가동률 · 가동 호기 기준' if kind == '일간' else '가동률 · 가동 호기 일간 합산'), 'utilization', ' %'), (('금월 가동일' if kind == '일간' else '기간 가동일'), 'working_days', ' 일'),
               ('금월 총생산량', 'month_total', ' kg'), (('금월 일평균' if kind == '일간' else '기간 일평균'), 'daily_average', ' kg/일'),
               ('인당 생산량 · 명·교대 기준', 'per_person', ' kg/명·교대'), ('전체 사용 전력량 · 공용 포함', 'energy', ' kWh'),

@@ -115,7 +115,7 @@ with st.expander('가동률에 포함된 가동 호기 목록'):
 
 for cells in [
     [((period_label + ' 생산량' if crew == '전체' else crew_view + ' ' + period_label + ' 생산량'), m['total'], ' kg'), ('A조 생산량 · ' + ((m['crew_shift_labels']['A'] + (' 근무' if m['crew_shift_labels']['A'] in ['주간','야간'] else '')) if period=='일간' else '기간 비교'), m['a'], ' kg'), ('B조 생산량 · ' + ((m['crew_shift_labels']['B'] + (' 근무' if m['crew_shift_labels']['B'] in ['주간','야간'] else '')) if period=='일간' else '기간 비교'), m['b'], ' kg'), (('전력량 · 한전 청구 기준' if billing_applied else '전력량 · DB 센서 기준'), m['energy'], ' kWh')],
-    [('평균 LOT SIZE', m['average_lot'], ' kg/LOT'), ('통합 LOT SIZE', m['integrated_lot'], ' kg/묶음'), (('가동률 · 가동 호기 기준' if period == '일간' else '가동률 · 가동 호기 합산') + (' · 잠정' if m['utilization_status'] == '잠정' else ''), m['utilization'], ' %'), ('압출기 전력량', m['extruder_energy'], ' kWh')],
+    [('평균 LOT SIZE', m['average_lot'], ' kg/LOT'), ('통합 LOT SIZE', m['integrated_lot'], ' kg/LOT'), (('가동률 · 가동 호기 기준' if period == '일간' else '가동률 · 가동 호기 합산') + (' · 잠정' if m['utilization_status'] == '잠정' else ''), m['utilization'], ' %'), ('압출기 전력량', m['extruder_energy'], ' kWh')],
     [('금월 총생산량', m['month_total'], ' kg'), (('금월 가동일' if period == '일간' else '기간 가동일'), m['working_days'], ' 일'), (('금월 일평균' if period == '일간' else '기간 일평균'), m['daily_average'], ' kg/일'), ('인당 생산량 · 명·교대 기준', m['per_person'], ' kg/명·교대')],
 ]:
     for col, (label, value, unit) in zip(st.columns(4), cells):
@@ -202,16 +202,16 @@ def render_visualizations(unit):
         lot_data['평균 LOT SIZE'] = daily['생산량_kg'].div(daily['LOT수'].where(daily['LOT수'] > 0))
         lot_data['통합 LOT SIZE'] = daily['생산량_kg'].div(daily['통합묶음수'].where(daily['통합묶음수'] > 0))
         lot_bars = lot_data.melt(id_vars='기간', var_name='지표', value_name='LOT SIZE')
-        lot_bars['단위'] = lot_bars['지표'].map({'평균 LOT SIZE':'kg/LOT', '통합 LOT SIZE':'kg/묶음'})
+        lot_bars['단위'] = lot_bars['지표'].map({'평균 LOT SIZE':'kg/LOT', '통합 LOT SIZE':'kg/LOT'})
         st.altair_chart(alt.Chart(lot_bars).mark_bar().encode(
             x=alt.X('기간:O', title='기간', sort=sorted(daily['기간'].tolist())),
             xOffset=alt.XOffset('지표:N', sort=['평균 LOT SIZE','통합 LOT SIZE']),
-            y=alt.Y('LOT SIZE:Q', title='LOT SIZE (kg/LOT · kg/묶음)', scale=alt.Scale(zero=True)),
+            y=alt.Y('LOT SIZE:Q', title='LOT SIZE (kg/LOT)', scale=alt.Scale(zero=True)),
             color=alt.Color('지표:N', scale=alt.Scale(
                 domain=['평균 LOT SIZE','통합 LOT SIZE'], range=['#69e4cd','#5d8ef0'])),
             tooltip=['기간:O','지표:N',alt.Tooltip('LOT SIZE:Q',format=',.1f'),'단위:N']
         ).properties(height=300), use_container_width=True)
-        st.caption('평균 LOT SIZE: kg/LOT · 통합 LOT SIZE: kg/묶음')
+        st.caption('평균 LOT SIZE: kg/LOT · 통합 LOT SIZE: kg/LOT')
     with energy_tab:
         st.subheader('공장 전체 전력량 추이')
         st.caption('월별로 한전 청구 자료가 있으면 청구 기준 추정 배분, 없으면 DB 센서 합계를 사용합니다.')
