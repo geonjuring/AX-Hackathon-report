@@ -1,5 +1,3 @@
-import json
-
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -8,7 +6,7 @@ from calendar import monthrange
 from billing_allocation import load_billing_allocation, apply_billing_basis, allocation_by_line
 from period_reporting import build_period_report, period_bounds, save_period_report, render_period_html, period_energy_by_line
 
-from production_report import (DATA, SETTINGS, load_data, summarize, number, render_html, save_report, configure_schedule, energy_by_line, load_runtime, load_headcount, utilization_number)
+from production_report import (DATA, load_data, summarize, number, render_html, save_report, energy_by_line, load_runtime, load_headcount, utilization_number)
 
 st.set_page_config(page_title='결산 리포트 | SLP', page_icon='📊', layout='wide')
 st.markdown('''<style>
@@ -91,9 +89,6 @@ with st.sidebar:
     crew_view = st.radio('근무조', ['전체', 'A조', 'B조'], horizontal=True)
     crew = '전체' if crew_view == '전체' else crew_view[0]
     people = 0
-    if st.button('예약 리포트 조회 조건 저장', use_container_width=True):
-        SETTINGS.write_text(json.dumps({'lines': lines, 'crew': crew, 'period': period, 'energy_basis': energy_basis}, ensure_ascii=False, indent=2), encoding='utf-8')
-        st.success('저장했습니다. 예약 및 명령어 리포트 생성에 적용됩니다.')
     if st.button('원본 데이터 새로 읽기', use_container_width=True):
         st.cache_data.clear()
         st.rerun()
@@ -328,7 +323,7 @@ with st.expander('날짜별 A/B조 주야 근무 확인'):
 
 st.caption('생산량·LOT·금월 지표는 선택 조 기준입니다. A/B조 비교 카드·압출기 전력량은 선택 라인의 조회 기간 전체 기준입니다. 가동률은 선택 라인 중 날짜별 가동 이력이 있는 호기만 포함합니다. 전체 사용 전력량은 공장 전체이며, 전력과 가동률을 조별로 배분하지 않습니다.')
 
-overview, details, lot_tab, basis = st.tabs(['생산 현황', '기간 리포트', '통합 LOT 검토', '계산 기준 · 자동화'])
+overview, details, lot_tab, basis = st.tabs(['생산 현황', '기간 리포트', '통합 LOT 검토', '계산 기준'])
 with overview:
     st.subheader(f'시각화 · {crew_view}')
     st.caption('차트의 생산량이 없는 날짜는 0으로 표시합니다. 가동률은 생산실적 유무와 관계없이 해당 날짜의 RPM 기록으로 계산합니다.')
@@ -394,28 +389,3 @@ with basis:
 ''')
     st.caption('주별 집계는 월내 1~7·8~14·15~21·22~28·29~말일입니다. 생산·전력은 일간 원장의 합이며, LOT 평균·인당 생산량은 합산한 분자와 분모로 재계산합니다. 가동률은 DB 일간 가동 분 합계 ÷ 일간 기준 분 합계로 계산합니다. 일별 비율을 단순 평균하지 않습니다. 기간 LOT/통합 묶음 수는 일별 건수의 합입니다.')
     st.caption('가동 분은 MES 재현식과 같이 원본 행을 세고 시간당 60분으로 제한합니다. 기록 확보율은 별도로 중복 분을 제거해 산출합니다. RPM 250의 경계 처리는 당시 MES 검증 자료에 없어 초과 조건으로 재현합니다.')
-    st.subheader('자동 작성과 예약 실행')
-    st.write('날짜·라인을 변경하면 지표와 리포트가 자동 갱신됩니다. 웹페이지를 열지 않고도 아래 명령으로 파일을 생성할 수 있습니다.')
-    st.code('/data/hackathon/.venv/bin/python /data/hackathon/production_report.py --date yesterday', language='bash')
-    st.caption('yesterday는 한국시간 전일입니다. 가동률은 업로드 DB RPM 기록으로 계산합니다. 인원은 해당 날짜의 생산일보를 다시 조회합니다.')
-    st.write('한국시간으로 실행 시각을 정한 뒤 예약을 등록하면, 웹페이지가 닫혀 있어도 서버가 전일 보고서를 생성합니다. 먼저 왼쪽에서 예약 리포트 조회 조건(라인·근무조)을 저장하세요.')
-    st.caption('생산일은 다음 날 08:30에 끝나므로 예약 시각은 한국시간 09:00 이후로 설정합니다.')
-    with st.form('daily_schedule'):
-        hour = st.number_input('매일 실행 시각 (한국시간 · 시)', min_value=9, max_value=23, value=9)
-        minute = st.number_input('분', min_value=0, max_value=59, value=0)
-        submitted = st.form_submit_button('매일 전일 리포트 예약 등록 / 변경')
-    if submitted:
-        try:
-            configure_schedule(hour, minute)
-            st.success(f'매일 한국시간 {hour:02d}:{minute:02d} 예약을 등록했습니다. 서버 cron 서비스가 실행 중이어야 동작합니다.')
-        except (OSError, ValueError, RuntimeError) as ex:
-            st.error(str(ex))
-    if st.button('이 리포트의 예약 해제'):
-        try:
-            configure_schedule(0, 0, enabled=False)
-            st.success('이 리포트의 예약을 해제했습니다.')
-        except (OSError, ValueError, RuntimeError) as ex:
-            st.error(str(ex))
-    st.write('직접 등록할 경우: 매일 한국시간 09:00은 UTC 서버에서 다음과 같습니다.')
-    st.code('0 0 * * * /data/hackathon/.venv/bin/python /data/hackathon/production_report.py --date yesterday >> /data/hackathon/reports/automation.log 2>&1', language='bash')
-    st.caption('등록 버튼을 누르기 전에는 예약하지 않습니다. 실적 CSV가 갱신되지 않으면 데이터 없음 경고 리포트가 생성됩니다. 결과: reports/YYYY-MM-DD/report.html')

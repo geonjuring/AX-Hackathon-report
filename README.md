@@ -43,12 +43,20 @@ streamlit run app.py
 
 배포 서버 주소·접속 경로는 포함하지 않았습니다. 필요하면 Streamlit 실행 옵션 또는 서버 전용 설정으로 지정합니다.
 
-자동 리포트 등록 기능은 Linux crontab과 UTC 서버를 전제로 합니다. 현재 예약 명령은 `/data/hackathon` 경로를 사용하므로 다른 위치에 설치하면 `configure_schedule()`과 화면 안내의 실행 경로를 수정해야 합니다. 예약 등록은 화면에서 별도로 실행합니다.
+팀 서버 이전 준비를 위해 예약 조회 조건 저장과 예약 등록·변경·해제 UI를 임시 제거했습니다. 화면에서 수동으로 리포트를 조회·다운로드·저장할 수 있습니다. CLI와 `configure_schedule()` 함수는 복원용으로 유지합니다. 예약 함수를 다시 연결하기 전 `/data/hackathon` 고정 경로, UTC 시간대, Linux cron 권한을 확인해야 합니다.
+
+## 파일 구성
+
+- 실행 코드: `app.py`, `pages/` 및 루트의 계산·집계 모듈
+- 검증 코드: `tests/`의 `test_*.py` 5개와 패키지 초기화 파일
+- 문서: `README.md`, `docs/FUNCTIONAL_SPEC.md`
+
+웹 실행에는 `tests/`가 필요하지 않습니다. 테스트는 프로젝트 루트에서 아래 명령으로 실행합니다.
 
 ## 테스트
 
 ```bash
-python -m unittest discover -p 'test_*.py'
+python -m unittest discover -s tests -t . -p 'test_*.py'
 ```
 
 원본 데이터·인사정보·보고서·캐시·환경설정 비밀값은 `.gitignore`로 제외합니다. 공개된 실제 데이터가 포함된 시연용 앱이 아닙니다.

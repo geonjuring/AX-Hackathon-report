@@ -4,7 +4,7 @@ import pandas as pd
 
 from billing_allocation import make_allocation, apply_billing_basis, allocation_by_line
 from period_reporting import build_period_report, render_period_html
-import test_period_reporting
+from tests import test_period_reporting
 
 
 class BillingTests(unittest.TestCase):
